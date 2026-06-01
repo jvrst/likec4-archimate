@@ -6,6 +6,9 @@ export default defineConfig({
   exclude: [
     'node_modules/**'
   ],
+  imageAliases: {
+    "@archimate": "./icons/archimate"
+  },
   generators: {
     /**
      * Generates CSV file with relationships to the 

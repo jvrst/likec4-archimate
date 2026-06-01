@@ -146,6 +146,7 @@ specification {
     style {
       color blue
       shape rectangle
+      icon @archimate/application-process.svg
     }
   }
 
