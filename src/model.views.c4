@@ -78,77 +78,82 @@ views {
     autoLayout TopBottom
   }
 
-  // ─── 3. Application Layer ─────────────────────────────────────────────
+  // ─── 3. Application Cooperation (Fig. 19 baseline) ───────────────────
   view applicationLayer {
-    title 'ArchiSurance – Application Layer'
+    title 'ArchiSurance – Application Cooperation (Baseline)'
 
-    include crmSystem, policySystem, claimsSystem
-    include customerPortal, financialSystem, docMgmtSystem
-    include customerData, policyData, claimsData, paymentData, documentData
+    group 'Front Office' {
+      include webPortal, callCenterApp
+      include generalCrmSystem, legalExpenseCrmSystem
+    }
+
+    group 'Back Office' {
+      include homeAwayPolicyAdmin
+      include homeAwayFinancialApp
+      include autoInsuranceApp
+      include legalExpenseBackOffice
+    }
+
+    group 'Shared Service Center' {
+      include docMgmtSystem
+    }
+
+    include customerData, policyData, claimData
     include claimRegisteredEvt, paymentProcessedEvt
 
-    include customerPortal -> crmSystem
-    include customerPortal -> policySystem
-    include customerPortal -> claimsSystem
-    include claimsSystem -> policySystem
-    include claimsSystem -> financialSystem
-    include claimsSystem -> docMgmtSystem
-    include policySystem -> crmSystem
-    include policySystem -> financialSystem
-    include policySystem -> docMgmtSystem
-    include crmSystem -> customerData
-    include policySystem -> policyData
-    include claimsSystem -> claimsData
-    include financialSystem -> paymentData
-    include docMgmtSystem -> documentData
-    include claimsSystem -> claimRegisteredEvt
-    include claimRegisteredEvt -> financialSystem
-    include financialSystem -> paymentProcessedEvt
+    include generalCrmSystem -> webPortal
+    include generalCrmSystem -> callCenterApp
+    include callCenterApp -> generalCrmSystem
+    include generalCrmSystem -> legalExpenseCrmSystem
+    include homeAwayPolicyAdmin -> docMgmtSystem
+    include homeAwayFinancialApp -> docMgmtSystem
+    include autoInsuranceApp -> docMgmtSystem
+    include legalExpenseBackOffice -> docMgmtSystem
+    include generalCrmSystem -> customerData
+    include homeAwayPolicyAdmin -> policyData
+    include homeAwayPolicyAdmin -> claimData
+    include homeAwayFinancialApp -> claimData
+    include autoInsuranceApp -> claimData
+    include homeAwayPolicyAdmin -> claimRegisteredEvt
+    include claimRegisteredEvt -> homeAwayFinancialApp
+    include homeAwayFinancialApp -> paymentProcessedEvt
 
     autoLayout TopBottom
   }
 
-  // ─── 4. Technology Layer ──────────────────────────────────────────────
+  // ─── 4. Technology Layer (Fig. 26 baseline) ───────────────────────────
   view technologyLayer {
-    title 'ArchiSurance – Technology Layer'
+    title 'ArchiSurance – Infrastructure (Baseline)'
 
-    include internet, corporateNet
-    include webProxy, appServerCluster, dbServer, docServer, brokerServer
-    include webProxy.*, appServerCluster.*, dbServer.*, docServer.*, brokerServer.*
+    group 'Home & Away Headquarters' {
+      include haLan
+      include foWebServer, foGeneralServer, haServerCluster
+    }
 
-    include internet -> webProxy
-    include webProxy -> appServerCluster
-    include appServerCluster -> dbServer
-    include appServerCluster -> docServer
-    include appServerCluster -> brokerServer
-    include corporateNet -> appServerCluster
-    include corporateNet -> dbServer
+    group 'PRO-FIT Headquarters' {
+      include profitLan
+      include autoServer, docMgmtServer
+    }
 
-    autoLayout TopBottom
-  }
+    group 'LegallyYours Headquarters' {
+      include leServer
+    }
 
-  // ─── 5. Application–Technology Deployment ────────────────────────────
-  view deployment {
-    title 'ArchiSurance – Application Deployment'
+    include archisuranceWan
 
-    include crmSystem, policySystem, claimsSystem
-    include financialSystem, customerPortal, docMgmtSystem
-    include appServerCluster, webProxy, dbServer, docServer
-
-    include crmSystem -> appServerCluster
-    include policySystem -> appServerCluster
-    include claimsSystem -> appServerCluster
-    include financialSystem -> appServerCluster
-    include customerPortal -> webProxy
-    include docMgmtSystem -> docServer
-    include webProxy -> appServerCluster
-    include appServerCluster -> dbServer
-    include appServerCluster -> docServer
+    include haLan -> foWebServer
+    include haLan -> foGeneralServer
+    include haLan -> haServerCluster
+    include archisuranceWan -> haLan
+    include archisuranceWan -> profitLan
+    include archisuranceWan -> leServer
+    include profitLan -> autoServer
+    include profitLan -> docMgmtServer
 
     autoLayout TopBottom
   }
 
-  // ─── 6. Claim Handling – Cross-Layer Flow ────────────────────────────
+  // ─── 5. Claim Handling – Cross-Layer Flow ────────────────────────────
   view claimFlow {
     title 'ArchiSurance – Claim Handling (End-to-End)'
 
@@ -160,15 +165,14 @@ views {
     }
 
     group 'Application layer' {
-      include policySystem
-      include claimsSystem, claimsSystem.claimsSvc
-      include claimsData, policyData
-      include financialSystem, financialSystem.paymentSvc
+      include homeAwayPolicyAdmin, homeAwayPolicyAdmin.claimsAdminSvc
+      include homeAwayFinancialApp, homeAwayFinancialApp.paymentSvc
+      include claimData, policyData
       include claimRegisteredEvt, paymentProcessedEvt
     }
 
     group 'Technology layer' {
-      include appServerCluster, dbServer
+      include haServerCluster
     }
 
     include customerActor -> claimsHandlingSvc
@@ -178,20 +182,17 @@ views {
     include handleClaim.registerClaim -> handleClaim.assessDamage
     include handleClaim.assessDamage -> handleClaim.approvePayout
     include handleClaim.approvePayout -> handleClaim.settleClaim
-    include claimsSystem.claimsSvc -> claimsHandlingSvc
-    include claimsSystem -> policySystem
-    include claimsSystem -> financialSystem
-    include claimsSystem -> claimsData
-    include claimsSystem -> claimRegisteredEvt
-    include claimRegisteredEvt -> financialSystem
-    include financialSystem -> paymentProcessedEvt
-    include claimsSystem -> appServerCluster
-    include appServerCluster -> dbServer
+    include homeAwayPolicyAdmin.claimsAdminSvc -> claimsHandlingSvc
+    include homeAwayPolicyAdmin -> claimData
+    include homeAwayPolicyAdmin -> policyData
+    include homeAwayPolicyAdmin -> claimRegisteredEvt
+    include claimRegisteredEvt -> homeAwayFinancialApp
+    include homeAwayFinancialApp -> paymentProcessedEvt
 
     autoLayout LeftRight
   }
 
-  // ─── 7. Index / Landscape ─────────────────────────────────────────────
+  // ─── 6. Index / Landscape ─────────────────────────────────────────────
   view index {
     title 'ArchiSurance – Landscape Overview'
 
@@ -202,28 +203,23 @@ views {
     }
 
     group 'Application Layer' {
-      include crmSystem, policySystem, claimsSystem
-      include customerPortal, financialSystem, docMgmtSystem
+      include webPortal, callCenterApp, generalCrmSystem
+      include homeAwayPolicyAdmin, homeAwayFinancialApp
+      include autoInsuranceApp, legalExpenseBackOffice, docMgmtSystem
     }
 
     group 'Technology Layer' {
-      include appServerCluster, webProxy, dbServer
+      include haServerCluster, autoServer, docMgmtServer, leServer
     }
 
     include customerActor -> homeInsuranceSvc
     include customerActor -> travelInsuranceSvc
     include customerActor -> claimsHandlingSvc
-    include claimsHandlingSvc -> claimsSystem.claimsSvc
-    include claimsSystem.claimsSvc -> claimsSystem
-    include customerPortal -> policySystem
-    include customerPortal -> claimsSystem
-    include claimsSystem -> financialSystem
-    include policySystem -> crmSystem
-    include customerPortal -> webProxy
-    include crmSystem -> appServerCluster
-    include policySystem -> appServerCluster
-    include claimsSystem -> appServerCluster
-    include appServerCluster -> dbServer
+    include homeAwayPolicyAdmin.claimsAdminSvc -> claimsHandlingSvc
+    include generalCrmSystem -> webPortal
+    include homeAwayPolicyAdmin -> docMgmtSystem
+    include autoInsuranceApp -> docMgmtSystem
+    include legalExpenseBackOffice -> docMgmtSystem
 
     autoLayout LeftRight
   }

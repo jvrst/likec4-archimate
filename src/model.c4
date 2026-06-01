@@ -156,123 +156,133 @@ model {
   // Application Layer
   // ═══════════════════════════════════════════════════════════════════════
 
-  appComponent crmSystem 'CRM System' {
-    appService customerMgmtSvc 'Customer Management Service'
-    appInterface customerApi 'Customer API'
+  // ── Front Office ──────────────────────────────────────────────────────
+
+  appComponent webPortal 'Web Portal'
+
+  appComponent callCenterApp 'Call Center Application'
+
+  appComponent generalCrmSystem 'General CRM System' {
+    appService customerAdminSvc 'Customer Administration'
+    appInterface crmApi 'CRM API'
   }
 
-  appComponent policySystem 'Policy Administration System' {
-    appService policySvc 'Policy Service'
-    appInterface policyApi 'Policy API'
+  appComponent legalExpenseCrmSystem 'Legal Expense CRM System' {
+    appService leCrmSvc 'Legal Expense CRM Service'
   }
 
-  appComponent claimsSystem 'Claims Management System' {
-    appService claimsSvc 'Claims Service'
-    appInterface claimsApi 'Claims API'
+  // ── Back Office ───────────────────────────────────────────────────────
+
+  appComponent homeAwayPolicyAdmin 'Home & Away Policy Administration' {
+    appService claimsAdminSvc 'Claims Administration'
+    appService policyDataMgmt 'Policy Data Management'
+    appInterface hapaApi 'HAPA API'
   }
 
-  appComponent customerPortal 'Customer Self-Service Portal' {
-    appInterface portalUI 'Portal Web UI'
+  appComponent homeAwayFinancialApp 'Home & Away Financial Application' {
+    appService paymentSvc 'Payment Service'
+    appInterface financialApi 'Financial API'
   }
 
-  appComponent financialSystem 'Financial Administration System' {
-    appService paymentSvc 'Payment Processing Service'
-    appInterface paymentApi 'Payment API'
+  appComponent autoInsuranceApp 'Auto Insurance Application' {
+    appService autoClaimsSvc 'Auto Claims Administration'
   }
+
+  appComponent legalExpenseBackOffice 'Legal Expense Back-Office System' {
+    appService legalClaimsSvc 'Legal Claims Administration'
+  }
+
+  // ── Shared Service Center ─────────────────────────────────────────────
 
   appComponent docMgmtSystem 'Document Management System' {
+    appService scanningSvc 'Scanning'
     appService documentSvc 'Document Service'
   }
 
+  // ── Data Objects ──────────────────────────────────────────────────────
+
   dataObject customerData 'Customer Data'
   dataObject policyData 'Policy Data'
-  dataObject claimsData 'Claims Data'
-  dataObject paymentData 'Payment Data'
-  dataObject documentData 'Document Data'
+  dataObject claimData 'Claim Data'
+
+  // ── Events ────────────────────────────────────────────────────────────
 
   appEvent claimRegisteredEvt 'Claim Registered'
   appEvent paymentProcessedEvt 'Payment Processed'
 
-  // App service → Business service realization
-  claimsSvc -[realization]-> claimsHandlingSvc
-  policySvc -[realization]-> homeInsuranceSvc
-  policySvc -[realization]-> travelInsuranceSvc
-  policySvc -[realization]-> liabilityInsuranceSvc
-  customerMgmtSvc -[realization]-> customerCareSvc
-  paymentSvc -[realization]-> collectPremium
+  // App service → Business service/process realization
+  homeAwayPolicyAdmin.claimsAdminSvc -[realization]-> claimsHandlingSvc
+  autoInsuranceApp.autoClaimsSvc -[realization]-> claimsHandlingSvc
+  legalExpenseBackOffice.legalClaimsSvc -[realization]-> claimsHandlingSvc
+  homeAwayPolicyAdmin.policyDataMgmt -[realization]-> homeInsuranceSvc
+  homeAwayPolicyAdmin.policyDataMgmt -[realization]-> travelInsuranceSvc
+  autoInsuranceApp.autoClaimsSvc -[realization]-> liabilityInsuranceSvc
+  legalExpenseBackOffice.legalClaimsSvc -[realization]-> legalAssistanceSvc
+  generalCrmSystem.customerAdminSvc -[realization]-> customerCareSvc
+  homeAwayFinancialApp.paymentSvc -[realization]-> collectPremium
 
-  // Inter-component serving
-  customerPortal -[serving]-> crmSystem 'customer lookup'
-  customerPortal -[serving]-> policySystem 'policy queries'
-  customerPortal -[serving]-> claimsSystem 'claim filing'
-  claimsSystem -[serving]-> policySystem 'policy validation'
-  claimsSystem -[serving]-> financialSystem 'payout request'
-  claimsSystem -[serving]-> docMgmtSystem 'evidence storage'
-  policySystem -[serving]-> crmSystem 'customer data'
-  policySystem -[serving]-> financialSystem 'premium collection'
-  policySystem -[serving]-> docMgmtSystem 'policy documents'
+  // Inter-component serving (data exchange, Fig. 19)
+  generalCrmSystem -[serving]-> webPortal 'CRM data'
+  generalCrmSystem -[serving]-> callCenterApp 'call report'
+  callCenterApp -[serving]-> generalCrmSystem 'call report'
+  generalCrmSystem -[serving]-> legalExpenseCrmSystem 'customer data'
+  homeAwayPolicyAdmin -[serving]-> docMgmtSystem 'document data'
+  homeAwayFinancialApp -[serving]-> docMgmtSystem 'document data'
+  autoInsuranceApp -[serving]-> docMgmtSystem 'document data'
+  legalExpenseBackOffice -[serving]-> docMgmtSystem 'document data'
 
   // Data access
-  crmSystem -[access]-> customerData
-  policySystem -[access]-> policyData
-  policySystem -[access]-> customerData
-  claimsSystem -[access]-> claimsData
-  claimsSystem -[access]-> policyData
-  financialSystem -[access]-> paymentData
-  docMgmtSystem -[access]-> documentData
+  generalCrmSystem -[access]-> customerData
+  homeAwayPolicyAdmin -[access]-> policyData
+  homeAwayPolicyAdmin -[access]-> claimData
+  homeAwayPolicyAdmin -[access]-> customerData
+  homeAwayFinancialApp -[access]-> claimData
+  autoInsuranceApp -[access]-> policyData
+  autoInsuranceApp -[access]-> claimData
+  legalExpenseBackOffice -[access]-> policyData
+  legalExpenseBackOffice -[access]-> claimData
 
   // Async event flow
-  claimsSystem -[triggering]-> claimRegisteredEvt
-  claimRegisteredEvt -[triggering]-> financialSystem
-  financialSystem -[triggering]-> paymentProcessedEvt
+  homeAwayPolicyAdmin -[triggering]-> claimRegisteredEvt
+  claimRegisteredEvt -[triggering]-> homeAwayFinancialApp
+  homeAwayFinancialApp -[triggering]-> paymentProcessedEvt
 
 
   // ═══════════════════════════════════════════════════════════════════════
   // Technology Layer
   // ═══════════════════════════════════════════════════════════════════════
 
-  techNode appServerCluster 'Application Server Cluster' {
-    systemSoftware javaEE 'Java EE Runtime'
-    artifact crmWar 'crm.war'
-    artifact policyWar 'policy.war'
-    artifact claimsWar 'claims.war'
-    artifact financialWar 'financial.war'
-  }
+  // ── Home & Away Headquarters ──────────────────────────────────────────
 
-  techNode webProxy 'Web / Load Balancer' {
-    systemSoftware nginxSW 'NGINX'
-    artifact portalWar 'portal.war'
-  }
+  communicationNetwork haLan 'Home & Away LAN'
 
-  techNode dbServer 'Database Server' {
-    systemSoftware oracleDB 'Oracle DBMS'
-  }
+  device foWebServer 'FO Web Hosting Server'
+  device foGeneralServer 'FO General-Purpose Server'
+  device haServerCluster 'ArchiSurance General-Purpose Server Cluster'
 
-  techNode docServer 'Document Storage Server' {
-    systemSoftware cmsSW 'Content Management SW'
-  }
+  // ── PRO-FIT Headquarters ──────────────────────────────────────────────
 
-  techNode brokerServer 'Message Broker' {
-    systemSoftware kafkaSW 'Apache Kafka'
-  }
+  communicationNetwork profitLan 'PRO-FIT LAN'
 
-  communicationNetwork corporateNet 'Corporate Intranet'
-  communicationNetwork internet 'Internet (DMZ)'
+  device autoServer 'Auto General-Purpose Server'
+  device docMgmtServer 'Document Management Server'
+
+  // ── LegallyYours Headquarters ─────────────────────────────────────────
+
+  device leServer 'Legal Expense General-Purpose Server'
+
+  // ── WAN ───────────────────────────────────────────────────────────────
+
+  communicationNetwork archisuranceWan 'ArchiSurance WAN'
 
   // Technology serving
-  internet -[serving]-> webProxy 'external traffic'
-  webProxy -[serving]-> appServerCluster 'routes requests'
-  appServerCluster -[serving]-> dbServer 'persists data'
-  appServerCluster -[serving]-> docServer 'stores documents'
-  appServerCluster -[serving]-> brokerServer 'async events'
-  corporateNet -[serving]-> appServerCluster
-  corporateNet -[serving]-> dbServer
+  haLan -[serving]-> foWebServer
+  haLan -[serving]-> foGeneralServer
+  haLan -[serving]-> haServerCluster
+  archisuranceWan -[serving]-> haLan
+  archisuranceWan -[serving]-> profitLan
+  archisuranceWan -[serving]-> leServer
+  profitLan -[serving]-> autoServer
+  profitLan -[serving]-> docMgmtServer
 
-  // App component → Technology node (assignment / deployment)
-  crmSystem -[assignment]-> appServerCluster
-  policySystem -[assignment]-> appServerCluster
-  claimsSystem -[assignment]-> appServerCluster
-  financialSystem -[assignment]-> appServerCluster
-  customerPortal -[assignment]-> webProxy
-  docMgmtSystem -[assignment]-> docServer
 }
