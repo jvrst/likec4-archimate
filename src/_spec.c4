@@ -1,84 +1,608 @@
+// ArchiMate 3.1 element kinds for LikeC4
 specification {
 
-  element actor {
+  // ── Business Layer (yellow) ──────────────────────────────────────────────
+
+  element businessActor {
+    notation 'Business Actor'
     style {
+      color amber
       shape person
+    }
+  }
+
+  element businessRole {
+    notation 'Business Role'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element businessCollaboration {
+    notation 'Business Collaboration'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element businessInterface {
+    notation 'Business Interface'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element businessProcess {
+    notation 'Business Process'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element businessFunction {
+    notation 'Business Function'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element businessInteraction {
+    notation 'Business Interaction'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element businessEvent {
+    notation 'Business Event'
+    style {
+      color amber
+      shape queue
+    }
+  }
+
+  element businessService {
+    notation 'Business Service'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element businessObject {
+    notation 'Business Object'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element contract {
+    notation 'Contract'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  element product {
+    notation 'Product'
+    style {
+      color amber
+      shape rectangle
+    }
+  }
+
+  // ── Application Layer (blue) ─────────────────────────────────────────────
+
+  element appComponent {
+    notation 'Application Component'
+    style {
+      color blue
+      shape component
+    }
+  }
+
+  element appCollaboration {
+    notation 'Application Collaboration'
+    style {
+      color blue
+      shape rectangle
+    }
+  }
+
+  element appInterface {
+    notation 'Application Interface'
+    style {
+      color blue
+      shape rectangle
+    }
+  }
+
+  element appFunction {
+    notation 'Application Function'
+    style {
+      color blue
+      shape rectangle
+    }
+  }
+
+  element appInteraction {
+    notation 'Application Interaction'
+    style {
+      color blue
+      shape rectangle
+    }
+  }
+
+  element appProcess {
+    notation 'Application Process'
+    style {
+      color blue
+      shape rectangle
+    }
+  }
+
+  element appEvent {
+    notation 'Application Event'
+    style {
+      color blue
+      shape queue
+    }
+  }
+
+  element appService {
+    notation 'Application Service'
+    style {
+      color blue
+      shape rectangle
+    }
+  }
+
+  element dataObject {
+    notation 'Data Object'
+    style {
+      color blue
+      shape storage
+    }
+  }
+
+  // ── Technology Layer (green) ─────────────────────────────────────────────
+
+  element techNode {
+    notation 'Node'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element device {
+    notation 'Device'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element systemSoftware {
+    notation 'System Software'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element techCollaboration {
+    notation 'Technology Collaboration'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element techInterface {
+    notation 'Technology Interface'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element path {
+    notation 'Path'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element communicationNetwork {
+    notation 'Communication Network'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element techFunction {
+    notation 'Technology Function'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element techProcess {
+    notation 'Technology Process'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element techInteraction {
+    notation 'Technology Interaction'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element techEvent {
+    notation 'Technology Event'
+    style {
+      color green
+      shape queue
+    }
+  }
+
+  element techService {
+    notation 'Technology Service'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element artifact {
+    notation 'Artifact'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  // ── Physical Layer (orange) ──────────────────────────────────────────────
+
+  element equipment {
+    notation 'Equipment'
+    style {
+      color secondary
+      shape rectangle
+    }
+  }
+
+  element facility {
+    notation 'Facility'
+    style {
+      color secondary
+      shape rectangle
+    }
+  }
+
+  element distributionNetwork {
+    notation 'Distribution Network'
+    style {
+      color secondary
+      shape rectangle
+    }
+  }
+
+  element material {
+    notation 'Material'
+    style {
+      color secondary
+      shape rectangle
+    }
+  }
+
+  // ── Motivation (purple/indigo) ───────────────────────────────────────────
+
+  element stakeholder {
+    notation 'Stakeholder'
+    style {
+      color indigo
+      shape person
+    }
+  }
+
+  element driver {
+    notation 'Driver'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element assessment {
+    notation 'Assessment'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element goal {
+    notation 'Goal'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element outcome {
+    notation 'Outcome'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element principle {
+    notation 'Principle'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element requirement {
+    notation 'Requirement'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element constraint {
+    notation 'Constraint'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element meaning {
+    notation 'Meaning'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  element value {
+    notation 'Value'
+    style {
+      color indigo
+      shape rectangle
+    }
+  }
+
+  // ── Strategy (sky blue) ──────────────────────────────────────────────────
+
+  element resource {
+    notation 'Resource'
+    style {
+      color sky
+      shape rectangle
+    }
+  }
+
+  element capability {
+    notation 'Capability'
+    style {
+      color sky
+      shape rectangle
+    }
+  }
+
+  element valueStream {
+    notation 'Value Stream'
+    style {
+      color sky
+      shape rectangle
+    }
+  }
+
+  element courseOfAction {
+    notation 'Course of Action'
+    style {
+      color sky
+      shape rectangle
+    }
+  }
+
+  // ── Implementation & Migration (gray) ────────────────────────────────────
+
+  element workPackage {
+    notation 'Work Package'
+    style {
+      color gray
+      shape rectangle
+    }
+  }
+
+  element deliverable {
+    notation 'Deliverable'
+    style {
+      color gray
+      shape rectangle
+    }
+  }
+
+  element implementationEvent {
+    notation 'Implementation Event'
+    style {
+      color gray
+      shape queue
+    }
+  }
+
+  element plateau {
+    notation 'Plateau'
+    style {
+      color gray
+      shape rectangle
+    }
+  }
+
+  element gap {
+    notation 'Gap'
+    style {
+      color gray
+      shape rectangle
+    }
+  }
+
+  // ── Deployment nodes ─────────────────────────────────────────────────────
+
+  deploymentNode techNodeEnv {
+    notation 'Technology Node'
+    style {
       color green
     }
   }
 
-  element system {
-    notation "Software System"
+  deploymentNode location {
+    notation 'Location'
     style {
-      opacity 20%
-    }
-  }
-
-  element external-system {
-    notation "External Software System"
-    style {
-      opacity 20%
       color muted
     }
   }
 
-  element application
+  // ── ArchiMate Relationships ──────────────────────────────────────────────
+  //
+  // Structural
+  //   composition    filled diamond ◆── arrow
+  //   aggregation    open diamond ◇── arrow
+  //   realization    dashed, hollow arrowhead
+  //   assignment     solid, hollow arrowhead (circle not available; approximated)
+  //
+  // Dependency
+  //   serving        solid, open angle arrow  (element serves another)
+  //   access         dashed, vee arrow        (element accesses data)
+  //   influence      dashed, normal arrow     (element influences another)
+  //   association    solid, no arrows         (generic undirected link)
+  //   associationDir solid, vee arrow         (directed association)
+  //
+  // Dynamic
+  //   triggering     solid, normal arrow      (causal/temporal ordering)
+  //   flow           dashed, normal arrow     (flow of info/goods/money)
+  //
+  // Other
+  //   specialization solid, hollow arrowhead  (is-a / sub-type)
 
-  element component {
-    style {
-      opacity 20%
-    }
-  }
-  element service {
-    link https://github.com/likec4/template 'Repository'
-  }
-
-  element webapp {
-    #teamA
-    notation "Web Application"
-    style {
-      shape browser
-    }
-  }
-  element mobile {
-    #teamA
-    notation "Mobile Application"
-    style {
-      shape mobile
-    }
-  }
-  element database {
-    notation "Database"
-    technology "PostgreSQL"
-    style {
-      shape storage
-      icon tech:postgresql
-      opacity 30%
-    }
-  }
-  element db-table {
-    notation "Database Table"
-    style {
-      shape storage
-      icon tech:postgresql
-    }
-  }
-
-  tag deprecated {
-    color rgb(100 100 100)
-  }
-  tag next
-  tag v1
-  tag v1_1
-  tag v2
-  tag teamA
-  tag teamB
-
-  relationship solid {
+  relationship composition {
+    notation 'Composition'
+    color primary
     line solid
+    tail diamond
+    head normal
   }
 
-  relationship many-to-many {
-    line dotted
+  relationship aggregation {
+    notation 'Aggregation'
+    color primary
+    line solid
+    tail odiamond
+    head normal
+  }
+
+  relationship realization {
+    notation 'Realization'
+    color primary
+    line dashed
+    head onormal
+    tail none
+  }
+
+  relationship assignment {
+    notation 'Assignment'
+    color primary
+    line solid
+    head normal
+    tail none
+  }
+
+  relationship serving {
+    notation 'Serving'
+    color primary
+    line solid
+    head open
+    tail none
+  }
+
+  relationship access {
+    notation 'Access'
+    color primary
+    line dashed
+    head vee
+    tail none
+  }
+
+  relationship influence {
+    notation 'Influence'
+    color muted
+    line dashed
+    head normal
+    tail none
+  }
+
+  relationship association {
+    notation 'Association'
+    color muted
+    line solid
+    head none
+    tail none
+  }
+
+  relationship associationDir {
+    notation 'Association (directed)'
+    color muted
+    line solid
+    head vee
+    tail none
+  }
+
+  relationship triggering {
+    notation 'Triggering'
+    color primary
+    line solid
+    head normal
+    tail none
+  }
+
+  relationship flow {
+    notation 'Flow'
+    color primary
+    line dashed
+    head normal
+    tail none
+  }
+
+  relationship specialization {
+    notation 'Specialization'
+    color primary
+    line solid
+    head onormal
+    tail none
   }
 }
+

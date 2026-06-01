@@ -1,217 +1,278 @@
+// ArchiSurance Case Study
+// Fictional insurance company formed by merging Home & Away, PRO Insurance, and Legally Yours.
+// Demonstrates all ArchiMate layers using the element kinds and relationship kinds
+// defined in archimate.c4.
+
 model {
 
-  customer = actor 'Customer' {
-    -> boutique 'uses'
-    -> boutique.frontend 'browses and buys products' {
-      navigateTo place-order
-      link https://github.com/likec4/template 'Repository'
-    }
-    -> boutique.frontend.catalogue 'browses products'
-    -> boutique.frontend.checkout 'buys products' {
-      navigateTo place-order
-      link https://github.com/likec4/template 'Repository'
-      link https://github.com/likec4/template/issues 'Issues'
-    }
-    -> boutique.frontend.profile 'manages account and reviews history'
+  // ═══════════════════════════════════════════════════════════════════════
+  // Motivation Layer
+  // ═══════════════════════════════════════════════════════════════════════
+
+  stakeholder customerStakeholder 'Customer'
+  stakeholder regulator 'Regulator'
+  stakeholder shareholder 'Shareholder'
+
+  driver marketPressure 'Competitive Market Pressure'
+  driver regulatoryChange 'Regulatory Changes'
+  driver mergerIntegration 'Post-Merger Integration'
+
+  assessment legacySystemRisk 'High Risk from Legacy Systems'
+  assessment customerChurnRisk 'Risk of Customer Churn'
+
+  goal customerSatisfaction 'Improve Customer Satisfaction'
+  goal regulatoryCompliance 'Achieve Regulatory Compliance'
+  goal profitableGrowth 'Achieve Profitable Growth'
+  goal operationalEfficiency 'Increase Operational Efficiency'
+
+  principle serviceOrientation 'Service Orientation'
+  principle privacyByDesign 'Privacy by Design'
+
+  requirement fastClaimHandling 'Claims processed within 5 business days'
+  requirement gdprCompliance 'GDPR Compliance'
+  requirement highAvailability '99.9% System Availability'
+
+  // Stakeholder → Goal
+  customerStakeholder -[association]-> customerSatisfaction
+  shareholder -[association]-> profitableGrowth
+  regulator -[association]-> regulatoryCompliance
+
+  // Driver → Goal (influence)
+  marketPressure -[influence]-> customerSatisfaction 'drives'
+  marketPressure -[influence]-> profitableGrowth 'drives'
+  regulatoryChange -[influence]-> regulatoryCompliance 'drives'
+  mergerIntegration -[influence]-> operationalEfficiency 'drives'
+
+  // Assessment → Requirement
+  legacySystemRisk -[association]-> highAvailability
+  customerChurnRisk -[association]-> fastClaimHandling
+
+  // Requirement → Goal (realization)
+  fastClaimHandling -[realization]-> customerSatisfaction
+  gdprCompliance -[realization]-> regulatoryCompliance
+  highAvailability -[realization]-> operationalEfficiency
+
+  // Principle → Goal
+  serviceOrientation -[association]-> operationalEfficiency
+  serviceOrientation -[association]-> fastClaimHandling
+  privacyByDesign -[association]-> gdprCompliance
+
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Business Layer
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Actors & Roles
+  businessActor archisurance 'ArchiSurance' {
+    businessRole insuranceAdvisor 'Insurance Advisor'
+    businessRole claimsHandler 'Claims Handler'
+    businessRole customerServiceRep 'Customer Service Representative'
   }
 
-  boutique = system 'Online Boutique System' {
+  businessActor customerActor 'Customer'
+  businessActor repairPartner 'Repair Company'
+  businessActor legalPartner 'Legal Firm'
 
-    link https://github.com/likec4/template 'Repository'
-    link ./model.c4#L18 'Model'
+  businessCollaboration claimsSettlement 'Claims Settlement Collaboration'
 
-    description '
-      E-commerce app for browsing and purchasing various items.
-    '
-
-    email = service 'Email Service' {
-      description 'Sends emails to customers using templates and customer data.'
-
-      -> email-provider 'delegates email sending'
-    }
-
-    checkout = service 'Checkout Service' {
-      #teamB
-      icon tech:nodejs
-      technology 'Node.js'
-      description '''
-        Retrieves _user cart_, prepares _order_ and orchestrates _payment_, _shipping_ and _email_ notifications.
-
-      '''
-
-      metadata {
-        npm '@boutique/checkout'
-        version '1.0.0'
-      }
-
-      -> payments.processor 'sends payment request' {
-        navigateTo place-order
-      }
-      -> shipping 'sends checkout data' {
-        navigateTo order-fulfillment
-      }
-      -> email 'sends order confirmation'
-      -> actionLog 'sends activity data' #v2 #next
-    }
-
-    cart = service 'Cart Service' {
-      #teamA
-      icon tech:nodejs
-      technology 'Node.js'
-      description "Stores the items in the user's shopping cart in Redis and retrieves it."
-
-      api = component 'Cart API' {
-        #v1, #teamA
-        icon tech:fastify
-        technology 'fastify'
-        description 'Provides access to cart data.'
-        link https://github.com/likec4/template 'Repository'
-        metadata {
-          npm '@boutique/cart-api'
-          version: '1.0.0'
-        }
-      }
-
-      cache = component 'Cart Cache' {
-        #deprecated
-        icon tech:redis
-        technology 'Redis'
-        description 'Stores cart data.'
-      }
-
-      api -> cache 'gets cart data' #deprecated
-      api -> catalogue 'gets product data'
-      api -> actionLog 'sends activity data' #v2 #next
-    }
-
-    actionLog = service 'Action Log Service' {
-      icon tech:go
-      technology 'Go'
-      description 'Manages user activity and search history.'
-    }
-
-    payments = service 'Payment Service' {
-      icon tech:scala
-      description 'Charges the given credit card info with the given amount and returns a transaction ID.'
-
-      processor = component 'Payment Processor' {
-        icon tech:scala
-        technology 'Scala'
-        description 'Charges the given credit card info with the given amount and returns a transaction ID.'
-        -> payment-gateway 'processes payments' {
-          navigateTo order-fulfillment
-        }
-        -> db.orders 'updates order status'
-      }
-
-      currency = component 'Currency Service' {
-        icon tech:scala
-        technology 'Scala'
-        description '''
-          **Converts** one money amount to _another currency_.
-
-        '''
-      }
-    }
-
-    shipping = service 'Shipping Service' {
-      icon tech:net
-      technology '.NET Service'
-      description 'Gives shipping cost estimates based on the shopping cart. Ships items to the given address.'
-
-      // -> db.orders 'updates shipping data'
-    }
-
-    catalogue = service 'Product Catalogue Service' {
-      icon tech:python
-      technology 'Laravel'
-      description 'Provides a list of products and ability to search products and get individual products.'
-      -> db.products 'gets products'
-    }
-
-    frontend = webapp 'Frontend' {
-      #v1
-      icon tech:vue
-      technology 'Vue.js / TypeScript'
-      description 'Provides access to the services via the web interface'
-
-      this -> actionLog 'sends user activity data'
-
-      catalogue = component 'Product Catalogue' {
-        #teamA #v1
-        icon tech:vue
-        technology 'Vue.js / TypeScript'
-        description 'Displays products and allows users to search and view individual products'
-      }
-
-      checkout = component 'Checkout' {
-        #teamA #v1_1
-        icon tech:vue
-        technology 'Vue.js / TypeScript'
-        description 'Allows to review shopping cart, enter shipping details and proceed to the payment'
-      }
-
-      profile = component 'User Profile' {
-        #teamA #next #v2
-        icon tech:vue
-        technology 'Vue.js / TypeScript'
-        description 'Displays user information and order history.'
-      }
-
-      this -> cart 'gets cart data'
-      catalogue -> boutique.catalogue 'gets product data'
-      catalogue -> cart.api 'puts items in cart'
-      checkout -> payments.currency 'gets exchange rates'
-      checkout -> cart.api 'gets cart data'
-      checkout -> boutique.checkout 'sends checkout information' {
-        navigateTo place-order
-        link https://github.com/likec4/template 'Repository'
-      }
-      checkout -> shipping 'gets shipping cost'
-    }
-
-    db = database 'Boutique Database' {
-      description '''
-        _Stores_ all **products**, **orders**, and **user data**.
-
-      '''
-
-      products = db-table 'Products' {
-        description 'Stores all product data.'
-      }
-
-      orders = db-table 'Orders' {
-        description 'Stores all order data.'
-      }
-
-      users = db-table 'Users' {
-        description 'Stores all user data.'
-      }
-
-      orders -[many-to-many]-> products {
-        title 'many-to-many'
-      }
-      orders -[many-to-many]-> users {
-        title 'many-to-many'
-      }
-    }
+  // Processes
+  businessProcess handleClaim 'Handle Claim' {
+    businessProcess registerClaim 'Register Claim'
+    businessProcess assessDamage 'Assess Damage'
+    businessProcess approvePayout 'Approve Payout'
+    businessProcess settleClaim 'Settle Claim'
   }
 
-  payment-gateway = external-system 'Payment Gateway' {
-    technology 'Stripe'
-    description '''
-      _3rd-party_ Platform to process  
-      **online payments**
+  businessProcess sellPolicy 'Sell Insurance Policy'
+  businessProcess renewPolicy 'Renew Policy'
+  businessProcess onboardCustomer 'Onboard Customer'
+  businessProcess collectPremium 'Collect Premium'
 
-    '''
+  // Events
+  businessEvent claimFiled 'Claim Filed'
+  businessEvent policyExpiry 'Policy Expiry Notification'
+  businessEvent premiumDue 'Premium Due Date'
+
+  // Services
+  businessService homeInsuranceSvc 'Home Insurance Service'
+  businessService travelInsuranceSvc 'Travel Insurance Service'
+  businessService liabilityInsuranceSvc 'Liability Insurance Service'
+  businessService legalAssistanceSvc 'Legal Assistance Service'
+  businessService claimsHandlingSvc 'Claims Handling Service'
+  businessService customerCareSvc 'Customer Care Service'
+
+  // Objects
+  businessObject policy 'Insurance Policy'
+  businessObject claim 'Claim'
+  businessObject customerRecord 'Customer Record'
+  businessObject premium 'Premium'
+  contract insuranceContract 'Insurance Contract'
+  product homeInsuranceProduct 'Home Insurance'
+  product travelInsuranceProduct 'Travel Insurance'
+
+  // Customer uses services
+  customerActor -[serving]-> homeInsuranceSvc 'purchases'
+  customerActor -[serving]-> travelInsuranceSvc 'purchases'
+  customerActor -[serving]-> liabilityInsuranceSvc 'purchases'
+  customerActor -[serving]-> legalAssistanceSvc 'uses'
+  customerActor -[serving]-> claimsHandlingSvc 'files claim via'
+  customerActor -[serving]-> customerCareSvc 'contacts'
+
+  // Role assignments to processes
+  archisurance.claimsHandler -[assignment]-> handleClaim
+  archisurance.insuranceAdvisor -[assignment]-> sellPolicy
+  archisurance.insuranceAdvisor -[assignment]-> renewPolicy
+  archisurance.customerServiceRep -[assignment]-> onboardCustomer
+
+  // Process → Service realization
+  handleClaim -[realization]-> claimsHandlingSvc
+  sellPolicy -[realization]-> homeInsuranceSvc
+  sellPolicy -[realization]-> travelInsuranceSvc
+  sellPolicy -[realization]-> liabilityInsuranceSvc
+  renewPolicy -[realization]-> homeInsuranceSvc
+  onboardCustomer -[realization]-> customerCareSvc
+
+  // Event triggering
+  claimFiled -[triggering]-> handleClaim
+  policyExpiry -[triggering]-> renewPolicy
+  premiumDue -[triggering]-> collectPremium
+
+  // Sub-process flow
+  handleClaim.registerClaim -[triggering]-> handleClaim.assessDamage
+  handleClaim.assessDamage -[triggering]-> handleClaim.approvePayout
+  handleClaim.approvePayout -[triggering]-> handleClaim.settleClaim
+
+  // Collaboration
+  archisurance -[association]-> claimsSettlement
+  repairPartner -[association]-> claimsSettlement
+
+  // Object relationships
+  policy -[realization]-> insuranceContract
+  homeInsuranceProduct -[realization]-> homeInsuranceSvc
+  travelInsuranceProduct -[realization]-> travelInsuranceSvc
+
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Application Layer
+  // ═══════════════════════════════════════════════════════════════════════
+
+  appComponent crmSystem 'CRM System' {
+    appService customerMgmtSvc 'Customer Management Service'
+    appInterface customerApi 'Customer API'
   }
 
-  email-provider = external-system 'Email Provider' {
-    technology 'SendGrid'
-    description '''
-      _3rd-party_ Platform to send  
-      **transactional emails**
-
-    '''
+  appComponent policySystem 'Policy Administration System' {
+    appService policySvc 'Policy Service'
+    appInterface policyApi 'Policy API'
   }
+
+  appComponent claimsSystem 'Claims Management System' {
+    appService claimsSvc 'Claims Service'
+    appInterface claimsApi 'Claims API'
+  }
+
+  appComponent customerPortal 'Customer Self-Service Portal' {
+    appInterface portalUI 'Portal Web UI'
+  }
+
+  appComponent financialSystem 'Financial Administration System' {
+    appService paymentSvc 'Payment Processing Service'
+    appInterface paymentApi 'Payment API'
+  }
+
+  appComponent docMgmtSystem 'Document Management System' {
+    appService documentSvc 'Document Service'
+  }
+
+  dataObject customerData 'Customer Data'
+  dataObject policyData 'Policy Data'
+  dataObject claimsData 'Claims Data'
+  dataObject paymentData 'Payment Data'
+  dataObject documentData 'Document Data'
+
+  appEvent claimRegisteredEvt 'Claim Registered'
+  appEvent paymentProcessedEvt 'Payment Processed'
+
+  // App service → Business service realization
+  claimsSvc -[realization]-> claimsHandlingSvc
+  policySvc -[realization]-> homeInsuranceSvc
+  policySvc -[realization]-> travelInsuranceSvc
+  policySvc -[realization]-> liabilityInsuranceSvc
+  customerMgmtSvc -[realization]-> customerCareSvc
+  paymentSvc -[realization]-> collectPremium
+
+  // Inter-component serving
+  customerPortal -[serving]-> crmSystem 'customer lookup'
+  customerPortal -[serving]-> policySystem 'policy queries'
+  customerPortal -[serving]-> claimsSystem 'claim filing'
+  claimsSystem -[serving]-> policySystem 'policy validation'
+  claimsSystem -[serving]-> financialSystem 'payout request'
+  claimsSystem -[serving]-> docMgmtSystem 'evidence storage'
+  policySystem -[serving]-> crmSystem 'customer data'
+  policySystem -[serving]-> financialSystem 'premium collection'
+  policySystem -[serving]-> docMgmtSystem 'policy documents'
+
+  // Data access
+  crmSystem -[access]-> customerData
+  policySystem -[access]-> policyData
+  policySystem -[access]-> customerData
+  claimsSystem -[access]-> claimsData
+  claimsSystem -[access]-> policyData
+  financialSystem -[access]-> paymentData
+  docMgmtSystem -[access]-> documentData
+
+  // Async event flow
+  claimsSystem -[triggering]-> claimRegisteredEvt
+  claimRegisteredEvt -[triggering]-> financialSystem
+  financialSystem -[triggering]-> paymentProcessedEvt
+
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Technology Layer
+  // ═══════════════════════════════════════════════════════════════════════
+
+  techNode appServerCluster 'Application Server Cluster' {
+    systemSoftware javaEE 'Java EE Runtime'
+    artifact crmWar 'crm.war'
+    artifact policyWar 'policy.war'
+    artifact claimsWar 'claims.war'
+    artifact financialWar 'financial.war'
+  }
+
+  techNode webProxy 'Web / Load Balancer' {
+    systemSoftware nginxSW 'NGINX'
+    artifact portalWar 'portal.war'
+  }
+
+  techNode dbServer 'Database Server' {
+    systemSoftware oracleDB 'Oracle DBMS'
+  }
+
+  techNode docServer 'Document Storage Server' {
+    systemSoftware cmsSW 'Content Management SW'
+  }
+
+  techNode brokerServer 'Message Broker' {
+    systemSoftware kafkaSW 'Apache Kafka'
+  }
+
+  communicationNetwork corporateNet 'Corporate Intranet'
+  communicationNetwork internet 'Internet (DMZ)'
+
+  // Technology serving
+  internet -[serving]-> webProxy 'external traffic'
+  webProxy -[serving]-> appServerCluster 'routes requests'
+  appServerCluster -[serving]-> dbServer 'persists data'
+  appServerCluster -[serving]-> docServer 'stores documents'
+  appServerCluster -[serving]-> brokerServer 'async events'
+  corporateNet -[serving]-> appServerCluster
+  corporateNet -[serving]-> dbServer
+
+  // App component → Technology node (assignment / deployment)
+  crmSystem -[assignment]-> appServerCluster
+  policySystem -[assignment]-> appServerCluster
+  claimsSystem -[assignment]-> appServerCluster
+  financialSystem -[assignment]-> appServerCluster
+  customerPortal -[assignment]-> webProxy
+  docMgmtSystem -[assignment]-> docServer
 }

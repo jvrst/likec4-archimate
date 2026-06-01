@@ -1,198 +1,230 @@
 views {
 
+  // ─── 1. Motivation ────────────────────────────────────────────────────
+  view motivation {
+    title 'ArchiSurance – Motivation'
+
+    include customerStakeholder, regulator, shareholder
+    include marketPressure, regulatoryChange, mergerIntegration
+    include legacySystemRisk, customerChurnRisk
+    include customerSatisfaction, regulatoryCompliance
+    include profitableGrowth, operationalEfficiency
+    include serviceOrientation, privacyByDesign
+    include fastClaimHandling, gdprCompliance, highAvailability
+
+    include customerStakeholder -> customerSatisfaction
+    include regulator -> regulatoryCompliance
+    include shareholder -> profitableGrowth
+    include marketPressure -> customerSatisfaction
+    include marketPressure -> profitableGrowth
+    include regulatoryChange -> regulatoryCompliance
+    include mergerIntegration -> operationalEfficiency
+    include legacySystemRisk -> highAvailability
+    include customerChurnRisk -> fastClaimHandling
+    include fastClaimHandling -> customerSatisfaction
+    include gdprCompliance -> regulatoryCompliance
+    include highAvailability -> operationalEfficiency
+    include serviceOrientation -> operationalEfficiency
+    include serviceOrientation -> fastClaimHandling
+    include privacyByDesign -> gdprCompliance
+
+    autoLayout TopBottom
+  }
+
+  // ─── 2. Business Layer ────────────────────────────────────────────────
+  view businessLayer {
+    title 'ArchiSurance – Business Layer'
+
+    include customerActor, repairPartner, legalPartner
+    include archisurance, archisurance.*
+    include claimsSettlement
+
+    include homeInsuranceSvc, travelInsuranceSvc
+    include liabilityInsuranceSvc, legalAssistanceSvc
+    include claimsHandlingSvc, customerCareSvc
+
+    include handleClaim, handleClaim.*
+    include sellPolicy, renewPolicy, onboardCustomer, collectPremium
+    include claimFiled, policyExpiry, premiumDue
+
+    include policy, claim, customerRecord, premium
+    include insuranceContract, homeInsuranceProduct, travelInsuranceProduct
+
+    include customerActor -> homeInsuranceSvc
+    include customerActor -> travelInsuranceSvc
+    include customerActor -> liabilityInsuranceSvc
+    include customerActor -> claimsHandlingSvc
+    include customerActor -> customerCareSvc
+    include archisurance.claimsHandler -> handleClaim
+    include archisurance.insuranceAdvisor -> sellPolicy
+    include archisurance.insuranceAdvisor -> renewPolicy
+    include archisurance.customerServiceRep -> onboardCustomer
+    include handleClaim -> claimsHandlingSvc
+    include sellPolicy -> homeInsuranceSvc
+    include renewPolicy -> homeInsuranceSvc
+    include onboardCustomer -> customerCareSvc
+    include claimFiled -> handleClaim
+    include policyExpiry -> renewPolicy
+    include premiumDue -> collectPremium
+    include handleClaim.registerClaim -> handleClaim.assessDamage
+    include handleClaim.assessDamage -> handleClaim.approvePayout
+    include handleClaim.approvePayout -> handleClaim.settleClaim
+    include archisurance -> claimsSettlement
+    include repairPartner -> claimsSettlement
+    include policy -> insuranceContract
+    include homeInsuranceProduct -> homeInsuranceSvc
+    include travelInsuranceProduct -> travelInsuranceSvc
+
+    autoLayout TopBottom
+  }
+
+  // ─── 3. Application Layer ─────────────────────────────────────────────
+  view applicationLayer {
+    title 'ArchiSurance – Application Layer'
+
+    include crmSystem, policySystem, claimsSystem
+    include customerPortal, financialSystem, docMgmtSystem
+    include customerData, policyData, claimsData, paymentData, documentData
+    include claimRegisteredEvt, paymentProcessedEvt
+
+    include customerPortal -> crmSystem
+    include customerPortal -> policySystem
+    include customerPortal -> claimsSystem
+    include claimsSystem -> policySystem
+    include claimsSystem -> financialSystem
+    include claimsSystem -> docMgmtSystem
+    include policySystem -> crmSystem
+    include policySystem -> financialSystem
+    include policySystem -> docMgmtSystem
+    include crmSystem -> customerData
+    include policySystem -> policyData
+    include claimsSystem -> claimsData
+    include financialSystem -> paymentData
+    include docMgmtSystem -> documentData
+    include claimsSystem -> claimRegisteredEvt
+    include claimRegisteredEvt -> financialSystem
+    include financialSystem -> paymentProcessedEvt
+
+    autoLayout TopBottom
+  }
+
+  // ─── 4. Technology Layer ──────────────────────────────────────────────
+  view technologyLayer {
+    title 'ArchiSurance – Technology Layer'
+
+    include internet, corporateNet
+    include webProxy, appServerCluster, dbServer, docServer, brokerServer
+    include webProxy.*, appServerCluster.*, dbServer.*, docServer.*, brokerServer.*
+
+    include internet -> webProxy
+    include webProxy -> appServerCluster
+    include appServerCluster -> dbServer
+    include appServerCluster -> docServer
+    include appServerCluster -> brokerServer
+    include corporateNet -> appServerCluster
+    include corporateNet -> dbServer
+
+    autoLayout TopBottom
+  }
+
+  // ─── 5. Application–Technology Deployment ────────────────────────────
+  view deployment {
+    title 'ArchiSurance – Application Deployment'
+
+    include crmSystem, policySystem, claimsSystem
+    include financialSystem, customerPortal, docMgmtSystem
+    include appServerCluster, webProxy, dbServer, docServer
+
+    include crmSystem -> appServerCluster
+    include policySystem -> appServerCluster
+    include claimsSystem -> appServerCluster
+    include financialSystem -> appServerCluster
+    include customerPortal -> webProxy
+    include docMgmtSystem -> docServer
+    include webProxy -> appServerCluster
+    include appServerCluster -> dbServer
+    include appServerCluster -> docServer
+
+    autoLayout TopBottom
+  }
+
+  // ─── 6. Claim Handling – Cross-Layer Flow ────────────────────────────
+  view claimFlow {
+    title 'ArchiSurance – Claim Handling (End-to-End)'
+
+    group 'Business layer' {
+      include customerActor
+      include archisurance.claimsHandler
+      include claimFiled, handleClaim, handleClaim.*
+      include claimsHandlingSvc
+    }
+
+    group 'Application layer' {
+      include policySystem
+      include claimsSystem, claimsSystem.claimsSvc
+      include claimsData, policyData
+      include financialSystem, financialSystem.paymentSvc
+      include claimRegisteredEvt, paymentProcessedEvt
+    }
+
+    group 'Technology layer' {
+      include appServerCluster, dbServer
+    }
+
+    include customerActor -> claimsHandlingSvc
+    include claimFiled -> handleClaim
+    include archisurance.claimsHandler -> handleClaim
+    include handleClaim -> claimsHandlingSvc
+    include handleClaim.registerClaim -> handleClaim.assessDamage
+    include handleClaim.assessDamage -> handleClaim.approvePayout
+    include handleClaim.approvePayout -> handleClaim.settleClaim
+    include claimsSystem.claimsSvc -> claimsHandlingSvc
+    include claimsSystem -> policySystem
+    include claimsSystem -> financialSystem
+    include claimsSystem -> claimsData
+    include claimsSystem -> claimRegisteredEvt
+    include claimRegisteredEvt -> financialSystem
+    include financialSystem -> paymentProcessedEvt
+    include claimsSystem -> appServerCluster
+    include appServerCluster -> dbServer
+
+    autoLayout LeftRight
+  }
+
+  // ─── 7. Index / Landscape ─────────────────────────────────────────────
   view index {
-    title 'System Landscape'
-    include
-      *
+    title 'ArchiSurance – Landscape Overview'
 
-    style boutique {
-      size large
-    }
-  }
-
-  view customer of customer {
-    description '''
-      **Customer** interactions with the system.
-
-    '''
-
-
-    include
-      *,
-      -> boutique.*
-  }
-
-  view boutique of boutique {
-    description '
-      E-commerce app for browsing items, add them to the cart,
-      and purchasing them.
-    '
-    include
-      *,
-      customer with {
-        size sm
-        textSize large
-        color green
-      }
-    exclude
-      frontend -> actionLog,
-      payment-gateway,
-      email-provider
-
-    style db, frontend {
-      multiple true
-    }
-    style boutique {
-      opacity 0%
-    }
-  }
-
-  view frontend of boutique.frontend {
-    #teamA #v1_1 #v2
-    title 'Frontend'
-    link https://github.com/likec4/template 'Repository'
-
-    include
-      *,
-      boutique
-
-    style * {
-      color secondary
-      opacity 10%
+    group 'Business Layer' {
+      include customerActor, archisurance
+      include homeInsuranceSvc, travelInsuranceSvc
+      include liabilityInsuranceSvc, legalAssistanceSvc, claimsHandlingSvc
     }
 
-    style frontend._ {
-      color green
-    }
-  }
-
-  view checkout of boutique.checkout {
-    #teamB #v1_1 #v2
-    title 'Checkout Service'
-    description '''
-      Interactions of _Checkout Service_ with _other components_.
-
-      Checkout Service does:
-      - Retrieves user cart
-      - Prepares order
-      - Orchestrates the **payment**, **shipping** and the **email notification**.
-
-    '''
-    link https://github.com/likec4/template 'Repository'
-
-
-    include
-      *,
-      boutique,
-      customer,
-      payment-gateway,
-      email-provider
-
-    style * {
-      color secondary
-    }
-    style boutique, email-provider, payment-gateway {
-      color muted
-      opacity 10%
+    group 'Application Layer' {
+      include crmSystem, policySystem, claimsSystem
+      include customerPortal, financialSystem, docMgmtSystem
     }
 
-    style checkout._ {
-      color green
-    }
-  }
-
-  view cart of boutique.cart {
-    include
-      *,
-      boutique.frontend.* -> cart.*,
-      boutique,
-      customer
-
-    style * {
-      color secondary
-      opacity 0%
+    group 'Technology Layer' {
+      include appServerCluster, webProxy, dbServer
     }
 
-    style cart._ {
-      opacity 100%
-      color green
-    }
-  }
+    include customerActor -> homeInsuranceSvc
+    include customerActor -> travelInsuranceSvc
+    include customerActor -> claimsHandlingSvc
+    include claimsHandlingSvc -> claimsSystem.claimsSvc
+    include claimsSystem.claimsSvc -> claimsSystem
+    include customerPortal -> policySystem
+    include customerPortal -> claimsSystem
+    include claimsSystem -> financialSystem
+    include policySystem -> crmSystem
+    include customerPortal -> webProxy
+    include crmSystem -> appServerCluster
+    include policySystem -> appServerCluster
+    include claimsSystem -> appServerCluster
+    include appServerCluster -> dbServer
 
-  view payments of boutique.payments {
-    include
-      *,
-      boutique,
-      customer,
-      -> boutique.db.*,
-      boutique.checkout
-
-    style * {
-      color secondary
-    }
-    style boutique {
-      color muted
-      opacity 10%
-    }
-
-    style payments._ {
-      color green
-    }
-  }
-
-  view actionLog of boutique.actionLog {
-    include
-      *
-
-    style * {
-      color secondary
-    }
-    style actionLog {
-      color green
-    }
-  }
-
-  view shipping of boutique.shipping {
-    include
-      *,
-      boutique
-
-    style * {
-      color secondary
-      opacity 0%
-    }
-    style shipping {
-      color green
-    }
-  }
-
-  view database of boutique.db {
-    include
-      *,
-      boutique
-
-    style * {
-      color secondary
-      opacity 0%
-    }
-    style db._ {
-      opacity 20%
-      color green
-    }
-  }
-
-  view catalogue of boutique.catalogue {
-    include
-      *,
-      -> boutique.db.*,
-      boutique
-
-    style * {
-      color secondary
-      opacity 10%
-    }
-    style catalogue {
-      color green
-    }
+    autoLayout LeftRight
   }
 }
