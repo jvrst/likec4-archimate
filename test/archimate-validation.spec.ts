@@ -1,37 +1,43 @@
 import { test } from 'vitest'
 import { likec4model } from './likec4-model'
 
-// ── Element kind groups per ArchiMate 3.1 ───────────────────────────────────
+// ── Element kind groups per ArchiMate 4 ─────────────────────────────────────
+//
+// v4 merged the behavior elements (service, process, function, event) into a
+// single generic set, and made role/collaboration/path generic. Element kind
+// therefore no longer encodes a layer, so these rules are expressed in terms of
+// ArchiMate *aspects* (active / behavior / passive structure) rather than the
+// per-layer kinds used for 3.1.
 
 const motivation = [
   'stakeholder', 'driver', 'assessment', 'goal', 'outcome',
-  'principle', 'requirement', 'constraint', 'meaning', 'value',
+  'principle', 'requirement', 'meaning', 'value',
 ]
 
 const strategy = ['resource', 'capability', 'valueStream', 'courseOfAction']
 
-const businessActive   = ['businessActor', 'businessRole', 'businessCollaboration', 'businessInterface']
-const businessBehavior = ['businessProcess', 'businessFunction', 'businessInteraction', 'businessEvent']
-const businessService  = ['businessService']
-const businessPassive  = ['businessObject', 'contract', 'product']
+// Generic (Common Domain) behavior elements.
+const behavior = ['process', 'function', 'service', 'event']
 
-const appActive   = ['appComponent', 'appCollaboration', 'appInterface']
-const appBehavior = ['appFunction', 'appInteraction', 'appProcess', 'appEvent']
-const appService  = ['appService']
-const appPassive  = ['dataObject']
+// Active structure (Common + per-domain structural elements).
+const activeStructure = [
+  'role', 'collaboration', 'path',
+  'businessActor', 'businessInterface',
+  'appComponent', 'appInterface',
+  'node', 'device', 'systemSoftware', 'techInterface',
+  'communicationNetwork', 'equipment', 'facility', 'distributionNetwork',
+]
 
-const techActive   = ['techNode', 'device', 'systemSoftware', 'techCollaboration', 'techInterface', 'path', 'communicationNetwork']
-const techBehavior = ['techFunction', 'techProcess', 'techInteraction', 'techEvent']
-const techService  = ['techService']
-const techPassive  = ['artifact']
+// Passive structure.
+const passiveStructure = ['businessObject', 'dataObject', 'artifact', 'material']
 
-const physicalActive  = ['equipment', 'facility', 'distributionNetwork']
-const physicalPassive = ['material']
+// Composite elements (may contain/aggregate other elements across aspects).
+const composite = ['grouping', 'location', 'product']
 
-const allActive   = [...businessActive,   ...appActive,   ...techActive,   ...physicalActive]
-const allBehavior = [...businessBehavior, ...appBehavior, ...techBehavior]
-const allService  = [...businessService,  ...appService,  ...techService]
-const allPassive  = [...businessPassive,  ...appPassive,  ...techPassive,  ...physicalPassive]
+// Implementation & Migration.
+const implMigration = ['workPackage', 'deliverable', 'plateau']
+
+const core = [...activeStructure, ...behavior, ...passiveStructure]
 
 // ── Helper ───────────────────────────────────────────────────────────────────
 
@@ -44,39 +50,28 @@ function validPairs(combinations: [string[], string[]][]): Set<string> {
 }
 
 // ── Realization ──────────────────────────────────────────────────────────────
-// Gives concrete form to a more abstract concept.
-// Valid: behavior→service (within layer), lower-layer→upper-layer, strategy/business→motivation.
+// Gives concrete form to a more abstract concept. In v4 the abstract end is a
+// service or other behavior, a passive structure element, a motivation element
+// (e.g. requirement → goal), or a strategy element.
 
-test('realization: valid source/target combinations', ({ expect }) => {
-  const valid = validPairs([
-    [businessBehavior,                    businessService],
-    [appBehavior,                         appService],
-    [techBehavior,                        techService],
-    [[...appActive,  ...appService],      [...businessService, ...businessBehavior]],
-    [[...techActive, ...techService],     [...appService,      ...appActive]],
-    [[...strategy,   ...businessBehavior, ...businessActive], motivation],
-    [motivation,                          motivation],
-    [businessPassive,                     [...businessPassive, ...businessService]],
-  ])
+test('realization: target must be behavior, passive structure, motivation, or strategy', ({ expect }) => {
+  const validTargets = [...behavior, ...passiveStructure, ...motivation, ...strategy]
 
   for (const r of likec4model.relationshipsWhere({ kind: 'realization' })) {
     expect.soft(
-      valid.has(`${r.source.kind}→${r.target.kind}`),
-      `realization "${r.source.id}" → "${r.target.id}": ${r.source.kind} → ${r.target.kind} is not a valid ArchiMate realization`
+      validTargets.includes(r.target.kind),
+      `realization "${r.source.id}" → "${r.target.id}": ${r.target.kind} is not a valid ArchiMate realization target`
     ).toBe(true)
   }
 })
 
 // ── Assignment ───────────────────────────────────────────────────────────────
-// Active structure element is responsible for performing behavior,
-// or a node hosts a passive structure element.
+// An active structure element is responsible for performing behavior (or hosts
+// another structure element); a role may also be assigned to a work package.
 
-test('assignment: active structure → behavior/service/passive within same layer', ({ expect }) => {
+test('assignment: active structure → behavior/structure/work package', ({ expect }) => {
   const valid = validPairs([
-    [businessActive, [...businessBehavior, ...businessService, ...businessPassive, ...businessActive]],
-    [appActive,      [...appBehavior,      ...appService,      ...appPassive]],
-    [techActive,     [...techBehavior,     ...techService,     ...techPassive]],
-    [physicalActive, physicalPassive],
+    [activeStructure, [...behavior, ...activeStructure, ...passiveStructure, ...implMigration]],
   ])
 
   for (const r of likec4model.relationshipsWhere({ kind: 'assignment' })) {
@@ -92,7 +87,7 @@ test('assignment: active structure → behavior/service/passive within same laye
 // Passive structure cannot serve — it is accessed, not serving.
 
 test('serving: source must not be passive structure or motivation', ({ expect }) => {
-  const invalidSources = [...allPassive, ...motivation]
+  const invalidSources = [...passiveStructure, ...motivation]
 
   for (const r of likec4model.relationshipsWhere({ kind: 'serving' })) {
     expect.soft(
@@ -103,10 +98,10 @@ test('serving: source must not be passive structure or motivation', ({ expect })
 })
 
 // ── Access ───────────────────────────────────────────────────────────────────
-// A behavior or active structure element reads, writes, or uses a passive structure element.
+// A behavior or active structure element reads/writes/uses a passive structure element.
 
-test('access: source must be active/behavior/service and target must be passive structure', ({ expect }) => {
-  const validSources = [...allActive, ...allBehavior, ...allService]
+test('access: source must be active/behavior and target must be passive structure', ({ expect }) => {
+  const validSources = [...activeStructure, ...behavior]
 
   for (const r of likec4model.relationshipsWhere({ kind: 'access' })) {
     expect.soft(
@@ -114,18 +109,18 @@ test('access: source must be active/behavior/service and target must be passive 
       `access "${r.source.id}" → "${r.target.id}": ${r.source.kind} is not a valid access source`
     ).toBe(true)
     expect.soft(
-      allPassive.includes(r.target.kind),
+      passiveStructure.includes(r.target.kind),
       `access "${r.source.id}" → "${r.target.id}": ${r.target.kind} is not passive structure (access target must be passive)`
     ).toBe(true)
   }
 })
 
 // ── Triggering ───────────────────────────────────────────────────────────────
-// Causal or temporal ordering between behavior elements or events.
-// Active structure may also trigger events (e.g. a component emitting an event).
+// Causal or temporal ordering between behavior elements (events included) or
+// active structure elements that emit/receive them.
 
-test('triggering: source and target must be behavior, service, or active structure', ({ expect }) => {
-  const valid = [...allActive, ...allBehavior, ...allService]
+test('triggering: source and target must be behavior or active structure', ({ expect }) => {
+  const valid = [...activeStructure, ...behavior]
 
   for (const r of likec4model.relationshipsWhere({ kind: 'triggering' })) {
     expect.soft(
@@ -140,10 +135,11 @@ test('triggering: source and target must be behavior, service, or active structu
 })
 
 // ── Flow ─────────────────────────────────────────────────────────────────────
-// Transfer of information, goods, or money between behavior elements.
+// Transfer of information, goods, or money between behavior elements (and the
+// passive structure elements that are transferred).
 
-test('flow: source and target must be behavior, service, or passive structure', ({ expect }) => {
-  const valid = [...allBehavior, ...allService, ...allPassive]
+test('flow: source and target must be behavior or passive structure', ({ expect }) => {
+  const valid = [...behavior, ...passiveStructure]
 
   for (const r of likec4model.relationshipsWhere({ kind: 'flow' })) {
     expect.soft(
@@ -184,48 +180,35 @@ test('specialization: source and target must be the same element kind', ({ expec
 })
 
 // ── Composition & Aggregation ────────────────────────────────────────────────
-// Structural containment within the same layer.
+// Structural containment. v4 element kinds no longer encode a layer, so we group
+// by aspect: core (active/behavior/passive), motivation, strategy, and
+// implementation & migration. Composite elements (grouping, location, product)
+// and plateau may aggregate/compose across aspects, so they are unrestricted as
+// the source.
 
-test('composition: source and target must be in the same ArchiMate layer', ({ expect }) => {
-  const layers = [
-    [...motivation],
-    [...strategy],
-    [...businessActive, ...businessBehavior, ...businessService, ...businessPassive],
-    [...appActive,      ...appBehavior,      ...appService,      ...appPassive],
-    [...techActive,     ...techBehavior,     ...techService,     ...techPassive],
-    [...physicalActive, ...physicalPassive],
-  ]
+const aspects = [core, motivation, strategy, implMigration]
+const crossAspectContainers = [...composite, 'plateau']
 
-  function layerOf(kind: string): number {
-    return layers.findIndex(l => l.includes(kind))
-  }
+function aspectOf(kind: string): number {
+  return aspects.findIndex(a => a.includes(kind))
+}
 
+test('composition: source and target in the same aspect (composite sources unrestricted)', ({ expect }) => {
   for (const r of likec4model.relationshipsWhere({ kind: 'composition' })) {
+    if (crossAspectContainers.includes(r.source.kind)) continue
     expect.soft(
-      layerOf(r.source.kind) === layerOf(r.target.kind),
-      `composition "${r.source.id}" → "${r.target.id}": ${r.source.kind} and ${r.target.kind} are in different layers`
+      aspectOf(r.source.kind) === aspectOf(r.target.kind),
+      `composition "${r.source.id}" → "${r.target.id}": ${r.source.kind} and ${r.target.kind} are in different aspects`
     ).toBe(true)
   }
 })
 
-test('aggregation: source and target must be in the same ArchiMate layer', ({ expect }) => {
-  const layers = [
-    [...motivation],
-    [...strategy],
-    [...businessActive, ...businessBehavior, ...businessService, ...businessPassive],
-    [...appActive,      ...appBehavior,      ...appService,      ...appPassive],
-    [...techActive,     ...techBehavior,     ...techService,     ...techPassive],
-    [...physicalActive, ...physicalPassive],
-  ]
-
-  function layerOf(kind: string): number {
-    return layers.findIndex(l => l.includes(kind))
-  }
-
+test('aggregation: source and target in the same aspect (composite sources unrestricted)', ({ expect }) => {
   for (const r of likec4model.relationshipsWhere({ kind: 'aggregation' })) {
+    if (crossAspectContainers.includes(r.source.kind)) continue
     expect.soft(
-      layerOf(r.source.kind) === layerOf(r.target.kind),
-      `aggregation "${r.source.id}" → "${r.target.id}": ${r.source.kind} and ${r.target.kind} are in different layers`
+      aspectOf(r.source.kind) === aspectOf(r.target.kind),
+      `aggregation "${r.source.id}" → "${r.target.id}": ${r.source.kind} and ${r.target.kind} are in different aspects`
     ).toBe(true)
   }
 })
