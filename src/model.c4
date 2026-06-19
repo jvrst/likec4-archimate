@@ -64,49 +64,49 @@ model {
 
   // Actors & Roles
   businessActor archisurance 'ArchiSurance' {
-    businessRole insuranceAdvisor 'Insurance Advisor'
-    businessRole claimsHandler 'Claims Handler'
-    businessRole customerServiceRep 'Customer Service Representative'
+    role insuranceAdvisor 'Insurance Advisor'
+    role claimsHandler 'Claims Handler'
+    role customerServiceRep 'Customer Service Representative'
   }
 
   businessActor customerActor 'Customer'
   businessActor repairPartner 'Repair Company'
   businessActor legalPartner 'Legal Firm'
 
-  businessCollaboration claimsSettlement 'Claims Settlement Collaboration'
+  collaboration claimsSettlement 'Claims Settlement Collaboration'
 
   // Processes
-  businessProcess handleClaim 'Handle Claim' {
-    businessProcess registerClaim 'Register Claim'
-    businessProcess assessDamage 'Assess Damage'
-    businessProcess approvePayout 'Approve Payout'
-    businessProcess settleClaim 'Settle Claim'
+  process handleClaim 'Handle Claim' {
+    process registerClaim 'Register Claim'
+    process assessDamage 'Assess Damage'
+    process approvePayout 'Approve Payout'
+    process settleClaim 'Settle Claim'
   }
 
-  businessProcess sellPolicy 'Sell Insurance Policy'
-  businessProcess renewPolicy 'Renew Policy'
-  businessProcess onboardCustomer 'Onboard Customer'
-  businessProcess collectPremium 'Collect Premium'
+  process sellPolicy 'Sell Insurance Policy'
+  process renewPolicy 'Renew Policy'
+  process onboardCustomer 'Onboard Customer'
+  process collectPremium 'Collect Premium'
 
   // Events
-  businessEvent claimFiled 'Claim Filed'
-  businessEvent policyExpiry 'Policy Expiry Notification'
-  businessEvent premiumDue 'Premium Due Date'
+  event claimFiled 'Claim Filed'
+  event policyExpiry 'Policy Expiry Notification'
+  event premiumDue 'Premium Due Date'
 
   // Services
-  businessService homeInsuranceSvc 'Home Insurance Service'
-  businessService travelInsuranceSvc 'Travel Insurance Service'
-  businessService liabilityInsuranceSvc 'Liability Insurance Service'
-  businessService legalAssistanceSvc 'Legal Assistance Service'
-  businessService claimsHandlingSvc 'Claims Handling Service'
-  businessService customerCareSvc 'Customer Care Service'
+  service homeInsuranceSvc 'Home Insurance Service'
+  service travelInsuranceSvc 'Travel Insurance Service'
+  service liabilityInsuranceSvc 'Liability Insurance Service'
+  service legalAssistanceSvc 'Legal Assistance Service'
+  service claimsHandlingSvc 'Claims Handling Service'
+  service customerCareSvc 'Customer Care Service'
 
   // Objects
   businessObject policy 'Insurance Policy'
   businessObject claim 'Claim'
   businessObject customerRecord 'Customer Record'
   businessObject premium 'Premium'
-  contract insuranceContract 'Insurance Contract'
+  businessObject insuranceContract 'Insurance Contract'
   product homeInsuranceProduct 'Home Insurance'
   product travelInsuranceProduct 'Travel Insurance'
 
@@ -163,40 +163,40 @@ model {
   appComponent callCenterApp 'Call Center Application'
 
   appComponent generalCrmSystem 'General CRM System' {
-    appService customerAdminSvc 'Customer Administration'
+    service customerAdminSvc 'Customer Administration'
     appInterface crmApi 'CRM API'
   }
 
   appComponent legalExpenseCrmSystem 'Legal Expense CRM System' {
-    appService leCrmSvc 'Legal Expense CRM Service'
+    service leCrmSvc 'Legal Expense CRM Service'
   }
 
   // ── Back Office ───────────────────────────────────────────────────────
 
   appComponent homeAwayPolicyAdmin 'Home & Away Policy Administration' {
-    appService claimsAdminSvc 'Claims Administration'
-    appService policyDataMgmt 'Policy Data Management'
+    service claimsAdminSvc 'Claims Administration'
+    service policyDataMgmt 'Policy Data Management'
     appInterface hapaApi 'HAPA API'
   }
 
   appComponent homeAwayFinancialApp 'Home & Away Financial Application' {
-    appService paymentSvc 'Payment Service'
+    service paymentSvc 'Payment Service'
     appInterface financialApi 'Financial API'
   }
 
   appComponent autoInsuranceApp 'Auto Insurance Application' {
-    appService autoClaimsSvc 'Auto Claims Administration'
+    service autoClaimsSvc 'Auto Claims Administration'
   }
 
   appComponent legalExpenseBackOffice 'Legal Expense Back-Office System' {
-    appService legalClaimsSvc 'Legal Claims Administration'
+    service legalClaimsSvc 'Legal Claims Administration'
   }
 
   // ── Shared Service Center ─────────────────────────────────────────────
 
   appComponent docMgmtSystem 'Document Management System' {
-    appService scanningSvc 'Scanning'
-    appService documentSvc 'Document Service'
+    service scanningSvc 'Scanning'
+    service documentSvc 'Document Service'
   }
 
   // ── Data Objects ──────────────────────────────────────────────────────
@@ -207,8 +207,8 @@ model {
 
   // ── Events ────────────────────────────────────────────────────────────
 
-  appEvent claimRegisteredEvt 'Claim Registered'
-  appEvent paymentProcessedEvt 'Payment Processed'
+  event claimRegisteredEvt 'Claim Registered'
+  event paymentProcessedEvt 'Payment Processed'
 
   // App service → Business service/process realization
   homeAwayPolicyAdmin.claimsAdminSvc -[realization]-> claimsHandlingSvc

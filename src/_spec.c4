@@ -1,7 +1,97 @@
-// ArchiMate 3.1 element kinds for LikeC4
+// ArchiMate 4 element kinds for LikeC4
+//
+// Migrated from ArchiMate 3.1 to ArchiMate 4 (The Open Group, 2026).
+// Key v4 changes reflected here (see spec Appendix E.4):
+//   - Behavior elements merged across layers into a single generic set:
+//     service, process, function, event (no more business/app/tech variants).
+//   - Role and Collaboration are now generic (Common Domain) elements.
+//   - Path moved to the Common Domain.
+//   - Physical elements (equipment, facility, distribution network, material)
+//     are part of the Technology Domain.
+//   - Removed: the three Interactions, Constraint, Contract, Gap,
+//     Representation, and Implementation Event (now the generic Event).
+//   - "Layer" is renamed "Domain".
+//
+// Note: because v4 merges behavior across domains, the generic behavior
+// elements carry a single neutral color (slate). Colour an individual element
+// per-domain with an inline `style { color ... }` when a view needs it.
 specification {
 
-  // ── Business Layer (yellow) ──────────────────────────────────────────────
+  // ── Common Domain (neutral) ──────────────────────────────────────────────
+
+  element role {
+    notation 'Role'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  element collaboration {
+    notation 'Collaboration'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  element path {
+    notation 'Path'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  element service {
+    notation 'Service'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  element process {
+    notation 'Process'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  element function {
+    notation 'Function'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  element event {
+    notation 'Event'
+    style {
+      color slate
+      shape queue
+    }
+  }
+
+  element grouping {
+    notation 'Grouping'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  element location {
+    notation 'Location'
+    style {
+      color slate
+      shape rectangle
+    }
+  }
+
+  // ── Business Domain (yellow) ─────────────────────────────────────────────
 
   element businessActor {
     notation 'Business Actor'
@@ -11,64 +101,8 @@ specification {
     }
   }
 
-  element businessRole {
-    notation 'Business Role'
-    style {
-      color amber
-      shape rectangle
-    }
-  }
-
-  element businessCollaboration {
-    notation 'Business Collaboration'
-    style {
-      color amber
-      shape rectangle
-    }
-  }
-
   element businessInterface {
     notation 'Business Interface'
-    style {
-      color amber
-      shape rectangle
-    }
-  }
-
-  element businessProcess {
-    notation 'Business Process'
-    style {
-      color amber
-      shape rectangle
-    }
-  }
-
-  element businessFunction {
-    notation 'Business Function'
-    style {
-      color amber
-      shape rectangle
-    }
-  }
-
-  element businessInteraction {
-    notation 'Business Interaction'
-    style {
-      color amber
-      shape rectangle
-    }
-  }
-
-  element businessEvent {
-    notation 'Business Event'
-    style {
-      color amber
-      shape queue
-    }
-  }
-
-  element businessService {
-    notation 'Business Service'
     style {
       color amber
       shape rectangle
@@ -83,14 +117,6 @@ specification {
     }
   }
 
-  element contract {
-    notation 'Contract'
-    style {
-      color amber
-      shape rectangle
-    }
-  }
-
   element product {
     notation 'Product'
     style {
@@ -99,7 +125,7 @@ specification {
     }
   }
 
-  // ── Application Layer (blue) ─────────────────────────────────────────────
+  // ── Application Domain (blue) ─────────────────────────────────────────────
 
   element appComponent {
     notation 'Application Component'
@@ -109,57 +135,8 @@ specification {
     }
   }
 
-  element appCollaboration {
-    notation 'Application Collaboration'
-    style {
-      color blue
-      shape rectangle
-    }
-  }
-
   element appInterface {
     notation 'Application Interface'
-    style {
-      color blue
-      shape rectangle
-    }
-  }
-
-  element appFunction {
-    notation 'Application Function'
-    style {
-      color blue
-      shape rectangle
-    }
-  }
-
-  element appInteraction {
-    notation 'Application Interaction'
-    style {
-      color blue
-      shape rectangle
-    }
-  }
-
-  element appProcess {
-    notation 'Application Process'
-    style {
-      color blue
-      shape rectangle
-      icon @archimate/application-process.svg
-    }
-  }
-
-  element appEvent {
-    notation 'Application Event'
-    style {
-      color blue
-      shape queue
-    }
-  }
-
-  element appService {
-    notation 'Application Service'
     style {
       color blue
       shape rectangle
@@ -174,10 +151,18 @@ specification {
     }
   }
 
-  // ── Technology Layer (green) ─────────────────────────────────────────────
+  // ── Technology Domain (green, incl. physical elements) ────────────────────
 
-  element techNode {
+  element node {
     notation 'Node'
+    style {
+      color green
+      shape rectangle
+    }
+  }
+
+  element techInterface {
+    notation 'Technology Interface'
     style {
       color green
       shape rectangle
@@ -200,72 +185,8 @@ specification {
     }
   }
 
-  element techCollaboration {
-    notation 'Technology Collaboration'
-    style {
-      color green
-      shape rectangle
-    }
-  }
-
-  element techInterface {
-    notation 'Technology Interface'
-    style {
-      color green
-      shape rectangle
-    }
-  }
-
-  element path {
-    notation 'Path'
-    style {
-      color green
-      shape rectangle
-    }
-  }
-
   element communicationNetwork {
     notation 'Communication Network'
-    style {
-      color green
-      shape rectangle
-    }
-  }
-
-  element techFunction {
-    notation 'Technology Function'
-    style {
-      color green
-      shape rectangle
-    }
-  }
-
-  element techProcess {
-    notation 'Technology Process'
-    style {
-      color green
-      shape rectangle
-    }
-  }
-
-  element techInteraction {
-    notation 'Technology Interaction'
-    style {
-      color green
-      shape rectangle
-    }
-  }
-
-  element techEvent {
-    notation 'Technology Event'
-    style {
-      color green
-      shape queue
-    }
-  }
-
-  element techService {
-    notation 'Technology Service'
     style {
       color green
       shape rectangle
@@ -280,12 +201,11 @@ specification {
     }
   }
 
-  // ── Physical Layer (orange) ──────────────────────────────────────────────
-
+  // physical (part of the Technology Domain since v3.2)
   element equipment {
     notation 'Equipment'
     style {
-      color secondary
+      color green
       shape rectangle
     }
   }
@@ -293,7 +213,7 @@ specification {
   element facility {
     notation 'Facility'
     style {
-      color secondary
+      color green
       shape rectangle
     }
   }
@@ -301,7 +221,7 @@ specification {
   element distributionNetwork {
     notation 'Distribution Network'
     style {
-      color secondary
+      color green
       shape rectangle
     }
   }
@@ -309,7 +229,7 @@ specification {
   element material {
     notation 'Material'
     style {
-      color secondary
+      color green
       shape rectangle
     }
   }
@@ -372,14 +292,6 @@ specification {
     }
   }
 
-  element constraint {
-    notation 'Constraint'
-    style {
-      color indigo
-      shape rectangle
-    }
-  }
-
   element meaning {
     notation 'Meaning'
     style {
@@ -430,7 +342,7 @@ specification {
     }
   }
 
-  // ── Implementation & Migration (gray) ────────────────────────────────────
+  // ── Implementation & Migration (gray) ─────────────────────────────────────
 
   element workPackage {
     notation 'Work Package'
@@ -448,14 +360,6 @@ specification {
     }
   }
 
-  element implementationEvent {
-    notation 'Implementation Event'
-    style {
-      color gray
-      shape queue
-    }
-  }
-
   element plateau {
     notation 'Plateau'
     style {
@@ -464,15 +368,7 @@ specification {
     }
   }
 
-  element gap {
-    notation 'Gap'
-    style {
-      color gray
-      shape rectangle
-    }
-  }
-
-  // ── Deployment nodes ─────────────────────────────────────────────────────
+  // ── Deployment nodes (LikeC4 deployment views) ────────────────────────────
 
   deploymentNode techNodeEnv {
     notation 'Technology Node'
@@ -481,7 +377,7 @@ specification {
     }
   }
 
-  deploymentNode location {
+  deploymentNode deploymentLocation {
     notation 'Location'
     style {
       color muted
@@ -489,6 +385,7 @@ specification {
   }
 
   // ── ArchiMate Relationships ──────────────────────────────────────────────
+  // (unchanged in v4)
   //
   // Structural
   //   composition    filled diamond ◆── arrow
@@ -606,4 +503,3 @@ specification {
     tail none
   }
 }
-
